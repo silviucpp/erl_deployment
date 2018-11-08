@@ -102,15 +102,11 @@ In this script you will store all the variables values used into your `app.confi
 
 erlang.cookie=DGKJHKEJHKJDBJHGEDKJKJH
 
-# redis pool
-
-redis_pool.pool_size=10
-redis_pool.host=127.0.0.1
-redis_pool.port=6379
-
 # main app
 
-app.dependencies = lager,redis_pool
+app.dependencies = lager
+app.key=default value
+prod.app.key= value for prod environment
 
 ```
 
@@ -124,6 +120,7 @@ Your main `app.config` template used to generate the final application config.
 ${app.dependencies}
 
 {my_app, [
+    {key, <<"${key}">>}
 
 ]}
 
