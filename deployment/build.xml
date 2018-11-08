@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="Create deb package for Erlang release app">
+
+    <!-- Load ant contrib -->
+
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath>
+            <pathelement location="${project.deployment_scripts}/ant-contrib.jar"/>
+        </classpath>
+    </taskdef>
+
+    <!-- Detect project.root in case is not defined -->
+
+    <if>
+        <isset property="project.root"/>
+        <else>
+            <loadresource property="project.root">
+                <propertyresource name="basedir"/>
+            </loadresource>
+
+            <echo message="App detected project root: ${project.root}"/>
+        </else>
+    </if>
+
+    <!-- Load default properties -->
+
+    <property file="${project.deployment_scripts}/defaults.properties"/>
+
+    <!-- Import the other files -->
+
+    <import file="bootstrap.xml" as="nested"/>
+    <import file="fpm.xml" as="nested"/>
+
+    <!-- Public targets -->
+
+    <target name="help">
+        <echo>genconf  -Denv=${project.environments}</echo>
+        <echo>make_deb -Denv=${project.environments}</echo>
+    </target>
+
+    <target name="genconf" depends="check_env">
+
+        <antcallback target="bootstrap:gen_config" return="erlang.cookie" />
+
+        <!-- Copy system.config and vm.args in the proper profile -->
+
+        <switch value="${profile}">
+            <case value="release">
+                <echo message="Use RELEASE profile ..."/>
+                <copy file="${conf.temp_path}/app.config" tofile="${conf.app.profile.release}/sys.config" overwrite="true"/>
+                <copy file="${conf.temp_path}/vm.args" tofile="${conf.app.profile.release}/vm.args" overwrite="true"/>
+                <replace file="${conf.app.profile.release}/vm.args" token="${ERLANG_COOKIE}" value="${erlang.cookie}"/>
+            </case>
+
+            <default>
+                <echo message="Use DEVELOPMENT profile ..."/>
+
+                <copy file="${conf.temp_path}/app.config" tofile="${conf.app.profile.default}/sys.config" overwrite="true"/>
+                <copy file="${conf.temp_path}/vm.args" tofile="${conf.app.profile.default}/vm.args" overwrite="true"/>
+                <antcallback target="bootstrap::node_ip" return="node_ip" />
+                <replace file="${conf.app.profile.default}/vm.args" token="${NODE_IP}" value="${node_ip}"/>
+                <replace file="${conf.app.profile.default}/vm.args" token="${ERLANG_COOKIE}" value="${erlang.cookie}"/>
+            </default>
+
+        </switch>
+
+    </target>
+
+    <target name="make_deb" depends="check_env">
+
+        <antcall target="genconf">
+            <param name="env" value="${env}"/>
+            <param name="profile" value="release"/>
+        </antcall>
+
+        <antcall target="build_erlang" />
+
+        <antcallback target="prepare_files" return="tempdir_path, dst_postinst, dst_prerm, dst_upstart, dst_systemd" />
+
+        <antcall target="fpm::run" />
+
+        <delete includeEmptyDirs="true">
+            <fileset dir="${tempdir_path}"/>
+        </delete>
+
+    </target>
+
+    <!-- Internal targets -->
+
+    <target name="check_env">
+        <condition property="valid_env">
+            <and>
+                <isset property="env"/>
+                <matches pattern="${env}" string="${project.environments}"/>
+            </and>
+        </condition>
+        <fail message="Not a valid environment. use one of: ${project.environments}" unless="valid_env"/>
+    </target>
+
+    <target name="build_erlang" >
+
+        <exec executable="make" failonerror="true" dir="${project.root}">
+            <arg line="relclean" />
+        </exec>
+
+        <exec executable="rebar3" failonerror="true" dir="${project.root}">
+            <arg line="as release release" />
+        </exec>
+
+        <copy file="${deb.systemd.start_script}" tofile="${project.release.location}/${project.release.appdir}/start.sh"/>
+
+    </target>
+
+    <target name="create_temp_dir">
+
+        <exec executable="mktemp" outputproperty="tempdir_path" failonerror="true">
+            <arg line="-d /tmp/${package.name}_deb_XXXXXXXX" />
+        </exec>
+
+        <echo message="Temp path = ${tempdir_path}"/>
+
+    </target>
+
+    <target name="prepare_files" depends="create_temp_dir">
+
+        <property name="tempdir_path" value="${tempdir_path}"/>
+
+        <property name="dst_postinst" value="${tempdir_path}/postinst.sh"/>
+        <property name="dst_prerm" value="${tempdir_path}/prerm.sh"/>
+        <property name="dst_upstart" value="${tempdir_path}/${package.name}"/>
+        <property name="dst_systemd" value="${tempdir_path}/${package.name}.service"/>
+
+        <copy file="${deb.post_install}" tofile="${dst_postinst}"/>
+        <copy file="${deb.pre_remove}" tofile="${dst_prerm}"/>
+        <copy file="${deb.upstart_script}" tofile="${dst_upstart}"/>
+        <copy file="${deb.systemd}" tofile="${dst_systemd}"/>
+
+        <replace file="${dst_postinst}" token="${service_name}" value="${package.name}"/>
+        <replace file="${dst_prerm}" token="${service_name}" value="${package.name}"/>
+
+        <replace file="${dst_upstart}" token="${description}" value="${package.description}"/>
+        <replace file="${dst_upstart}" token="${version}" value="${package.version}"/>
+        <replace file="${dst_upstart}" token="${maintainer}" value="${package.maintainer}"/>
+        <replace file="${dst_upstart}" token="${app_root}" value="${package.home}"/>
+        <replace file="${dst_upstart}" token="${app_name}" value="${package.app}"/>
+
+        <replace file="${dst_systemd}" token="${description}" value="${package.description}"/>
+        <replace file="${dst_systemd}" token="${app_root}" value="${package.home}"/>
+        <replace file="${dst_systemd}" token="${app_name}" value="${package.app}"/>
+
+    </target>
+
+</project>

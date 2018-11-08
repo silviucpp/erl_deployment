@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="Bootstrap Erlang Releases">
+    
+    <!-- Scripts -->
+
+    <target name="bootstrap:scripts">
+
+        <scriptdef name="overwrite-properties" language="javascript">
+            <attribute name="environment" />
+            <![CDATA[
+                function overwrite_props(env, properties)
+                {
+                    var env_start= env+".";
+                    var keyIter = properties.keySet().iterator();
+                    while(keyIter.hasNext())
+                    {
+                        var key = keyIter.next();
+                        var value = properties.get(key);
+
+                        if(key.startsWith(env_start))
+                        {
+                            var property = key.slice(env_start.length);
+                            print("Update: "+property+" with: "+value);
+                            project.setProperty(property, value);
+                        }
+                    }
+                }
+
+                //overwrite properties with the one for that environment. those have higher priority
+                overwrite_props(attributes.get("environment"), project.getProperties());
+             ]]>
+        </scriptdef>
+
+        <scriptdef name="bootstrap-configs" language="javascript">
+            <attribute name="environment" />
+            <attribute name="modules" />
+            <attribute name="base_path" />
+            <![CDATA[
+
+                function load(fname)
+                {
+                    var reader, content, line;
+                    reader = new java.io.BufferedReader(new java.io.FileReader(fname));
+                    content = '';
+
+                    while (true)
+                    {
+                        line = reader.readLine();
+                        if (line === null)
+                            break;
+                        content += line + '\n';
+                    }
+
+                    return content.trim();
+                }
+
+                function replace(file, token, value)
+                {
+                    var task = project.createTask("replace");
+                    task.setFile(file);
+                    task.setToken("${"+token+"}");
+                    task.setValue(value);
+                    task.perform();
+                }
+
+                var properties = project.getProperties();
+                var modules = (attributes.get("modules")+",app").split(",");
+                var conf_root = attributes.get("base_path");
+
+                for (var i = 0; i < modules.length; i++)
+                {
+                    var module = modules[i].trim();
+                    var conf_file = new java.io.File(conf_root + "/" + module + ".config");
+
+                    print("Process config: "+ module);
+
+                    var keyIter = properties.keySet().iterator();
+                    while(keyIter.hasNext())
+                    {
+                        var key = keyIter.next();
+
+                        if(key.startsWith(module))
+                        {
+                            var prop = key.split(".").pop();
+                            replace(conf_file, prop, properties.get(key));
+                        }
+                    }
+
+                    if(module == 'app')
+                    {
+                        var content = '';
+
+                        for (var index = 0; index < modules.length -1; index++)
+                            content += load(conf_root + "/" + modules[index].trim() + ".config")+",\n\n";
+
+                        replace(conf_file, "app.dependencies", content);
+                    }
+
+                }
+            ]]>
+        </scriptdef>
+    </target>
+
+    <!-- Targets -->
+
+    <target name="bootstrap:gen_config" depends="bootstrap:scripts">
+        <echo>Env: ${env}</echo>
+        <echo>Temp path: ${conf.temp_path}</echo>
+        <echo>App config path: ${conf.app_path}</echo>
+
+        <mkdir dir='${conf.temp_path}' />
+
+        <if>
+            <isset property="conf.base_root"/>
+            <then>
+                <echo>Base config root: ${conf.base_root}</echo>
+
+                <copy todir="${conf.temp_path}" overwrite="true">
+                    <fileset dir="${conf.base_root}" />
+                </copy>
+
+                <property file="${conf.temp_path}/base.properties"/>
+
+                <overwrite-properties environment="${env}"/>
+
+            </then>
+            <else>
+                <echo>No base config root used...</echo>
+            </else>
+        </if>
+
+        <copy todir="${conf.temp_path}" overwrite="true">
+            <fileset dir="${conf.app_path}" />
+        </copy>
+
+        <property file="${conf.temp_path}/app.properties"/>
+
+        <overwrite-properties environment="${env}"/>
+
+        <echo>Deps: ${app.dependencies}</echo>
+
+        <bootstrap-configs environment="${env}" modules="${app.dependencies}" base_path ="${conf.temp_path}"/>
+    </target>
+    
+     <target name="bootstrap::node_ip">
+        <exec executable="/bin/bash" failonerror="true" outputproperty="node_ip" dir="${project.deployment_scripts}">
+            <arg line="get_ip.sh" />
+        </exec>
+
+        <echo message="Node IP is ${node_ip}"/>
+    </target>
+
+</project>
+

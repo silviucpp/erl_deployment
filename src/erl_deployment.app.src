@@ -1,0 +1,8 @@
+{application, erl_deployment, [
+    {description, "A tiny ANT framework for Erlang apps packaging"},
+    {vsn, "1.0"},
+    {registered, []},
+    {applications, [kernel, stdlib]},
+    {mod, { erl_deployment_app, []}},
+    {env, []}
+]}.

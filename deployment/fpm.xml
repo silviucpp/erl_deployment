@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="FPM targets for Erlang releases">
+
+    <!--
+        The following variables should be defined by the calling target
+
+        deb.use_upstart
+
+        package.name
+        package.version
+        package.maintainer
+        package.description
+
+        package.install_path
+        project.release.location
+        project.release.appdir
+
+        dst_postinst
+        dst_prerm
+        dst_upstart
+
+        dst_systemd
+    !-->
+
+    <target name="fpm::upstart">
+        <exec executable="fpm" failonerror="true">
+            <arg value="-s"/>
+            <arg value="dir"/>
+            <arg value="-t"/>
+            <arg value="deb"/>
+            <arg value="-f"/>
+            <arg value="-n"/>
+            <arg value="${package.name}"/>
+            <arg value="-v"/>
+            <arg value="${package.version}"/>
+            <arg value="--log=info"/>
+            <arg value="--after-install=${dst_postinst}"/>
+            <arg value="--before-remove=${dst_prerm}"/>
+            <arg value="--deb-upstart=${dst_upstart}"/>
+            <arg value="--maintainer=${package.maintainer}"/>
+            <arg value="--description=${package.description}"/>
+            <arg value="--architecture=native"/>
+            <arg value="--prefix=${package.install_path}"/>
+            <arg value="--depends=${deb.deps}"/>
+            <arg value="-C"/>
+            <arg value="${project.release.location}"/>
+            <arg value="${project.release.appdir}"/>
+        </exec>
+    </target>
+
+    <target name="fpm::systemd">
+        <exec executable="fpm" failonerror="true">
+            <arg value="-s"/>
+            <arg value="dir"/>
+            <arg value="-t"/>
+            <arg value="deb"/>
+            <arg value="-f"/>
+            <arg value="-n"/>
+            <arg value="${package.name}"/>
+            <arg value="-v"/>
+            <arg value="${package.version}"/>
+            <arg value="--log=info"/>
+            <arg value="--after-install=${dst_postinst}"/>
+            <arg value="--before-remove=${dst_prerm}"/>
+            <arg value="--deb-systemd=${dst_systemd}"/>
+            <arg value="--maintainer=${package.maintainer}"/>
+            <arg value="--description=${package.description}"/>
+            <arg value="--architecture=native"/>
+            <arg value="--prefix=${package.install_path}"/>
+            <arg value="--depends=${deb.deps}"/>
+            <arg value="-C"/>
+            <arg value="${project.release.location}"/>
+            <arg value="${project.release.appdir}"/>
+        </exec>
+    </target>
+
+    <target name="fpm::run">
+        <!-- https://github.com/jordansissel/fpm/wiki -->
+        <if>
+            <equals arg1="${deb.use_upstart}" arg2="true"/>
+            <then>
+                <echo message="***Generate package using UPSTART***"/>
+                <antcall target="fpm::upstart"/>
+            </then>
+            <else>
+                <echo message="***Generate package using SYSTEMD***"/>
+                <antcall target="fpm::systemd"/>
+            </else>
+        </if>
+    </target>
+</project>

@@ -1,0 +1,21 @@
+[Unit]
+
+Description=${description}
+After=syslog.target network.target local-fs.target
+
+[Service]
+
+Type=simple
+LimitNOFILE=120000
+Restart=on-failure
+RestartSec=5s
+
+Environment="HOME=${app_root}"
+Environment="RELX_REPLACE_OS_VARS=true"
+Environment="CODE_LOADING_MODE=interactive"
+
+ExecStart=/bin/bash ${app_root}/start.sh ${app_name}
+ExecStop=${app_name} stop
+
+[Install]
+WantedBy=multi-user.target
