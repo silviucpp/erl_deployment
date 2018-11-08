@@ -5,7 +5,7 @@ erl_deployment
 
 # Overview
 
-This is a very tiny framework based on `ant` scripts and `fpm` which allows you to:
+This is a very small framework based on `ant` scripts and `fpm` which allows you to:
 
 - package your erlang release into a deb or rpm package (currently only deb is is implemented)
 - define `sys.config` as a template with variables which have different values based on the environment where you deploy 
@@ -33,7 +33,8 @@ gem install --no-ri --no-rdoc fpm
 In order to integrate this into your app add it in `rebar.config` as dependency. 
 
 Create into your project root a subfolder and add there:
-- setup.properties : inside this file you will put the minimum required properties or override default one
+
+- `setup.properties` : inside this file you will put the minimum required properties or override default one
 - the `app.config` template (mandatory to keep this name), and also all other config files for each app included in the 
 rebar dependencies (in case you want to keep those separate).
 - the `app.properties` - the file where you will define all the values of the variables from your `app.config` template
@@ -45,6 +46,10 @@ A minimum config for the above files :
 
 #### build.xml
 
+This file is the main ant script, used to include the other scripts which are part of `erl_deployment`. 
+Basically this should sit into the root of your project in order to be able to run from there all `ant` commands. 
+But you can put it anywhere you want. 
+
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <project name="Build app">
@@ -55,12 +60,19 @@ A minimum config for the above files :
 
 #### vm.args
 
+The `vm.args` template of your application. `NODE_IP` is detected when the service starts `sudo service mypackage start`.
+The other variable `${ERLANG_COOKIE}` is replaced when package is generated based on your configs.
+
 ```erl
 -name appname@${NODE_IP}
 -setcookie ${ERLANG_COOKIE}
 ```
 
 #### setup.properties
+
+This is the file where you will setup at least the mandatory variables like : `package.name`, `project.deployment_scripts` and
+`conf.app_path`. Also you can change the default value of all other properties. See: "All configs available" section for 
+all other properties available:
 
 ```
 # package configs
@@ -82,6 +94,8 @@ conf.app_path = deployment/conf
 
 #### app.properties
 
+In this script you will store all the variables values used into your `app.config` template 
+
 ```erl
 
 # erlang
@@ -102,6 +116,8 @@ app.dependencies = lager,redis_pool
 
 #### app.config
 
+Your main `app.config` template used to generate the final application config.
+
 ```erl
 [
 
@@ -117,7 +133,7 @@ ${app.dependencies}
 
 ### rebar.config
 
-Also the `rebar.config` should include the following (important is `sys_config` and `vm_args`):
+The `rebar.config` should include the following for relx (important is `sys_config` and `vm_args`):
 
 ```erlang
 {relx, [
@@ -141,7 +157,9 @@ Also the `rebar.config` should include the following (important is `sys_config` 
 ]}.
 ```
 
-So basically a recommended project structure will be:
+### Project structure
+
+A recommended project structure will be:
 
 ```bash
 project_root
@@ -155,7 +173,7 @@ project_root
     rebar.config   
 ```
 
-Example of a skeleton project can be found here: <<TODO>> 
+Example of a skeleton project can be found here: **TODO** 
 
 # All configs available
 
