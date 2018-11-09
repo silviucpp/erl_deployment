@@ -111,12 +111,12 @@
         <mkdir dir='${conf.temp_path}' />
 
         <if>
-            <isset property="conf.base_root"/>
+            <isset property="conf.base_path"/>
             <then>
-                <echo>Base config root: ${conf.base_root}</echo>
+                <echo>Base config root: ${conf.base_path}</echo>
 
                 <copy todir="${conf.temp_path}" overwrite="true">
-                    <fileset dir="${conf.base_root}" />
+                    <fileset dir="${conf.base_path}" />
                 </copy>
 
                 <property file="${conf.temp_path}/base.properties"/>
