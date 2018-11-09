@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="Bootstrap Erlang Releases">
-    
+
     <!-- Scripts -->
 
     <target name="bootstrap:scripts">
@@ -141,11 +141,22 @@
 
         <bootstrap-configs environment="${env}" modules="${app.dependencies}" base_path ="${conf.temp_path}"/>
     </target>
-    
+
      <target name="bootstrap::node_ip">
-        <exec executable="/bin/bash" failonerror="true" outputproperty="node_ip" dir="${project.deployment_scripts}">
-            <arg line="get_ip.sh" />
-        </exec>
+
+         <if>
+             <os family="mac" />
+             <then>
+                 <exec executable="/bin/bash" failonerror="true" outputproperty="node_ip">
+                     <arg line="-c ${misc.ip.osx}" />
+                 </exec>
+             </then>
+             <else>
+                 <exec executable="/bin/bash" failonerror="true" outputproperty="node_ip">
+                     <arg line="-c ${misc.ip.linux}" />
+                 </exec>
+             </else>
+         </if>
 
         <echo message="Node IP is ${node_ip}"/>
     </target>

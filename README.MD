@@ -28,7 +28,7 @@ apt-get install ruby ruby-dev rubygems build-essential
 gem install --no-ri --no-rdoc fpm
 ```
 
-# Integration
+# Integration into a new app
 
 In order to integrate this into your app add it in `rebar.config` as dependency. 
 
@@ -203,6 +203,9 @@ files and also a `base.properties` one where you define the variables which have
 - `deb.systemd.start_script` - allows you to replace the bash script which systemd will use to start you app. defaults to `${project.deployment_scripts}/deb/start.sh`
 - `deb.use_upstart` - use upstart instead of systemd. (default: false). Ubuntu < 16.04 supports only upstart
 - `deb.deps` - set all the debian packages (comma separated) that needs to exist for your package to work properly.
+
+- `misc.ip.osx` - allow the user to set it's own command for getting the IP address on a OSX system
+- `misc.ip.linux` - allow the user to set it's own command for getting the IP address on a Linux based system
 
 # Use variables based on environment
 
