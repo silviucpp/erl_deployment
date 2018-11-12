@@ -153,7 +153,7 @@
              </then>
              <else>
                  <exec executable="/bin/bash" failonerror="true" outputproperty="node_ip">
-                     <arg line="-c ${misc.ip.linux}" />
+                     <arg line="-c &quot;${misc.ip.linux}&quot;" />
                  </exec>
              </else>
          </if>
