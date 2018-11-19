@@ -52,6 +52,13 @@
                 <replace file="${conf.app.profile.release}/vm.args" token="${ERLANG_COOKIE}" value="${erlang.cookie}"/>
             </case>
 
+            <case value="test">
+                <echo message="Use TEST profile ..."/>
+                <copy file="${conf.temp_path}/app.config" tofile="${conf.app.profile.test}/sys.config" overwrite="true"/>
+                <copy file="${conf.temp_path}/vm.args" tofile="${conf.app.profile.test}/vm.args" overwrite="true"/>
+                <replace file="${conf.app.profile.test}/vm.args" token="${ERLANG_COOKIE}" value="${erlang.cookie}"/>
+            </case>
+
             <default>
                 <echo message="Use DEVELOPMENT profile ..."/>
 
