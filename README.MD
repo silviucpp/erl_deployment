@@ -200,7 +200,6 @@ files and also a `base.properties` one where you define the variables which have
 - `deb.pre_remove` - in case you want to execute a custom bash script before package is removed. defaults to `${project.deployment_scripts}/deb/prerm.sh`
 - `deb.upstart_script` - in case you want to use another custom upstart script. defaults to `${project.deployment_scripts}/deb/upstart.conf`
 - `deb.systemd` - in case you want to use another custom systemd script. defaults to `${project.deployment_scripts}/deb/systemd.service`
-- `deb.systemd.start_script` - allows you to replace the bash script which systemd will use to start you app. defaults to `${project.deployment_scripts}/deb/start.sh`
 - `deb.use_upstart` - use upstart instead of systemd. (default: false). Ubuntu < 16.04 supports only upstart
 - `deb.deps` - set all the debian packages (comma separated) that needs to exist for your package to work properly.
 

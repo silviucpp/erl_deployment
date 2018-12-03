@@ -124,8 +124,22 @@
         <echo message="Temp path = ${tempdir_path}"/>
 
     </target>
+    
+    <target name="get_release_version">
+        <exec executable="find" outputproperty="vm_args_path" failonerror="true" dir="${project.release.location}">
+            <arg line = ". -name vm.args"/>
+        </exec>
+        
+        <propertyregex property="app_release_version" 
+                       input="${vm_args_path}" 
+                       regexp="(.*)/releases/(.*)/vm.args" 
+                       select="\2" 
+                       casesensitive="false" />
+        
+        <echo message="Release version = ${app_release_version}"/>
+    </target>
 
-    <target name="prepare_files" depends="create_temp_dir">
+    <target name="prepare_files" depends="create_temp_dir,get_release_version">
 
         <property name="tempdir_path" value="${tempdir_path}"/>
 
@@ -133,16 +147,14 @@
         <property name="dst_prerm" value="${tempdir_path}/prerm.sh"/>
         <property name="dst_upstart" value="${tempdir_path}/${package.name}"/>
         <property name="dst_systemd" value="${tempdir_path}/${package.name}.service"/>
-        <property name="dst_systemd_start_script" value="${project.release.location}/${project.release.appdir}/start.sh"/>
 
         <copy file="${deb.post_install}" tofile="${dst_postinst}"/>
         <copy file="${deb.pre_remove}" tofile="${dst_prerm}"/>
         <copy file="${deb.upstart_script}" tofile="${dst_upstart}"/>
         <copy file="${deb.systemd}" tofile="${dst_systemd}"/>
-        <copy file="${deb.systemd.start_script}" tofile="${dst_systemd_start_script}"/>
 
-        <replace file="${dst_postinst}" token="${service_name}" value="${package.name}"/>
-        <replace file="${dst_prerm}" token="${service_name}" value="${package.name}"/>
+        <replace file="${dst_postinst}" token="${get_ip_command}" value="${misc.ip.linux}"/>
+        <replace file="${dst_postinst}" token="${config_file}" value="${package.home}/releases/${app_release_version}/vm.args"/>
 
         <replace file="${dst_upstart}" token="${description}" value="${package.description}"/>
         <replace file="${dst_upstart}" token="${version}" value="${package.version}"/>
@@ -153,7 +165,6 @@
         <replace file="${dst_systemd}" token="${description}" value="${package.description}"/>
         <replace file="${dst_systemd}" token="${app_root}" value="${package.home}"/>
         <replace file="${dst_systemd}" token="${app_name}" value="${package.app}"/>
-        <replace file="${dst_systemd_start_script}" token="${get_ip_command}" value="${misc.ip.linux}"/>
 
     </target>
 
