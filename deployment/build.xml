@@ -82,7 +82,7 @@
 
         <antcall target="build_erlang" />
 
-        <antcallback target="prepare_files" return="tempdir_path, dst_postinst, dst_prerm, dst_upstart, dst_systemd" />
+        <antcallback target="prepare_files" return="tempdir_path, dst_postinst, dst_postupgrade, dst_prerm, dst_upstart, dst_systemd" />
 
         <antcall target="fpm::run" />
 
@@ -124,18 +124,18 @@
         <echo message="Temp path = ${tempdir_path}"/>
 
     </target>
-    
+
     <target name="get_release_version">
         <exec executable="find" outputproperty="vm_args_path" failonerror="true" dir="${project.release.location}">
             <arg line = ". -name vm.args"/>
         </exec>
-        
-        <propertyregex property="app_release_version" 
-                       input="${vm_args_path}" 
-                       regexp="(.*)/releases/(.*)/vm.args" 
-                       select="\2" 
+
+        <propertyregex property="app_release_version"
+                       input="${vm_args_path}"
+                       regexp="(.*)/releases/(.*)/vm.args"
+                       select="\2"
                        casesensitive="false" />
-        
+
         <echo message="Release version = ${app_release_version}"/>
     </target>
 
@@ -144,17 +144,22 @@
         <property name="tempdir_path" value="${tempdir_path}"/>
 
         <property name="dst_postinst" value="${tempdir_path}/postinst.sh"/>
+        <property name="dst_postupgrade" value="${tempdir_path}/postupgrade.sh"/>
         <property name="dst_prerm" value="${tempdir_path}/prerm.sh"/>
         <property name="dst_upstart" value="${tempdir_path}/${package.name}"/>
         <property name="dst_systemd" value="${tempdir_path}/${package.name}.service"/>
 
         <copy file="${deb.post_install}" tofile="${dst_postinst}"/>
+        <copy file="${deb.post_upgrade}" tofile="${dst_postupgrade}"/>
         <copy file="${deb.pre_remove}" tofile="${dst_prerm}"/>
         <copy file="${deb.upstart_script}" tofile="${dst_upstart}"/>
         <copy file="${deb.systemd}" tofile="${dst_systemd}"/>
 
         <replace file="${dst_postinst}" token="${get_ip_command}" value="${misc.ip.linux}"/>
         <replace file="${dst_postinst}" token="${config_file}" value="${package.home}/releases/${app_release_version}/vm.args"/>
+
+        <replace file="${dst_postupgrade}" token="${get_ip_command}" value="${misc.ip.linux}"/>
+        <replace file="${dst_postupgrade}" token="${config_file}" value="${package.home}/releases/${app_release_version}/vm.args"/>
 
         <replace file="${dst_upstart}" token="${description}" value="${package.description}"/>
         <replace file="${dst_upstart}" token="${version}" value="${package.version}"/>

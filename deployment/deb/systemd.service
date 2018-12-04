@@ -5,7 +5,7 @@ After=syslog.target network.target local-fs.target
 
 [Service]
 
-Type=simple
+Type=forking
 LimitNOFILE=120000
 Restart=on-failure
 RestartSec=5s
@@ -13,7 +13,7 @@ RestartSec=5s
 Environment="HOME=${app_root}"
 Environment="CODE_LOADING_MODE=interactive"
 
-ExecStart=${app_name} foreground > /dev/null 2>&1
+ExecStart=${app_name} start
 ExecStop=${app_name} stop
 
 [Install]
