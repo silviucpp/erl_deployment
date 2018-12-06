@@ -113,6 +113,20 @@
         <exec executable="rebar3" failonerror="true" dir="${project.root}">
             <arg line="as release release" />
         </exec>
+
+        <!--
+        	temporary workaround for:
+            https://github.com/erlware/relx/pull/649#issuecomment-436048940
+            https://github.com/erlang/rebar3/issues/1970
+        -->
+
+        <replace
+            file="${project.release.location}/${project.release.appdir}/bin/${project.release.appdir}"
+            token="-kernel net_ticktime $TICKTIME $VM_ARGS"
+            value="-kernel net_ticktime $TICKTIME"/>
+
+        <chmod file="${project.release.location}/${project.release.appdir}/bin/${project.release.appdir}" perm="+x"/>            
+
     </target>
 
     <target name="create_temp_dir">
