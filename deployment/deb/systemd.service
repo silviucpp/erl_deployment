@@ -6,11 +6,16 @@ After=syslog.target network.target local-fs.target
 [Service]
 
 Type=forking
+NotifyAccess=main
 LimitNOFILE=120000
+PIDFile=${app_root}/app.pid
 Restart=on-failure
+TimeoutStartSec=300s
 RestartSec=5s
+WatchdogSec=120
 
 Environment="HOME=${app_root}"
+Environment="ERLANG_PID_FILE_PATH=${app_root}/app.pid"
 Environment="CODE_LOADING_MODE=interactive"
 
 ExecStart=${app_name} start

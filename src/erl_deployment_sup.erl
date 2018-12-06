@@ -11,4 +11,10 @@ start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 init([]) ->
-    {ok, { {one_for_one, 5, 10}, []} }.
+    Children = [
+        proccess(erl_systemd, infinity)
+    ],
+    {ok, {{one_for_one, 20, 1}, Children}}.
+
+proccess(Name, WaitForClose) ->
+    {Name, {Name, start_link, []}, permanent, WaitForClose, worker, [Name]}.
