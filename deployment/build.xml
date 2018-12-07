@@ -75,10 +75,10 @@
 
     <target name="make_deb" depends="check_env">
 
-        <antcall target="genconf">
+        <antcallback target="genconf" return="erlang.cookie">
             <param name="env" value="${env}"/>
             <param name="profile" value="release"/>
-        </antcall>
+        </antcallback>
 
         <antcall target="build_erlang" />
 
@@ -125,7 +125,7 @@
             token="-kernel net_ticktime $TICKTIME $VM_ARGS"
             value="-kernel net_ticktime $TICKTIME"/>
 
-        <chmod file="${project.release.location}/${project.release.appdir}/bin/${project.release.appdir}" perm="+x"/>            
+        <chmod file="${project.release.location}/${project.release.appdir}/bin/${project.release.appdir}" perm="+x"/>
 
     </target>
 
@@ -171,9 +171,13 @@
 
         <replace file="${dst_postinst}" token="${get_ip_command}" value="${misc.ip.linux}"/>
         <replace file="${dst_postinst}" token="${config_file}" value="${package.home}/releases/${app_release_version}/vm.args"/>
+        <replace file="${dst_postinst}" token="${app_name}" value="${package.name}"/>
+        <replace file="${dst_postinst}" token="${cookie}" value="${erlang.cookie}"/>
 
         <replace file="${dst_postupgrade}" token="${get_ip_command}" value="${misc.ip.linux}"/>
         <replace file="${dst_postupgrade}" token="${config_file}" value="${package.home}/releases/${app_release_version}/vm.args"/>
+        <replace file="${dst_postupgrade}" token="${app_name}" value="${package.name}"/>
+        <replace file="${dst_postupgrade}" token="${cookie}" value="${erlang.cookie}"/>
 
         <replace file="${dst_upstart}" token="${description}" value="${package.description}"/>
         <replace file="${dst_upstart}" token="${version}" value="${package.version}"/>
