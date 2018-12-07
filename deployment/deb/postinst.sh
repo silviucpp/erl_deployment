@@ -10,4 +10,4 @@ replace_var() {
 ip=$(${get_ip_command})
 replace_var NODE_IP $ip ${config_file}
 
-erl -name reloader@$ip -setcookie ${cookie} -noshell -eval "rpc:call('${app_name}@$ip', reloader, reload_all_changed, [])" -eval "init:stop()"
+${reload_command}

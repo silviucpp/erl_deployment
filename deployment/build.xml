@@ -169,6 +169,19 @@
         <copy file="${deb.upstart_script}" tofile="${dst_upstart}"/>
         <copy file="${deb.systemd}" tofile="${dst_systemd}"/>
 
+        <if>
+            <equals arg1="${deb.reload_modified_beams}" arg2="true" />
+            <then>
+                <echo message="## Enable modules hot-swapping on update" />
+                <replace file="${dst_postinst}" token="${reload_command}" value=""/>
+                <replace file="${dst_postupgrade}" token="${reload_command}" value="${misc.reload_command}"/>
+            </then>
+            <else>
+                <replace file="${dst_postinst}" token="${reload_command}" value=""/>
+                <replace file="${dst_postupgrade}" token="${reload_command}" value=""/>
+            </else>
+        </if>
+
         <replace file="${dst_postinst}" token="${get_ip_command}" value="${misc.ip.linux}"/>
         <replace file="${dst_postinst}" token="${config_file}" value="${package.home}/releases/${app_release_version}/vm.args"/>
         <replace file="${dst_postinst}" token="${app_name}" value="${package.name}"/>
