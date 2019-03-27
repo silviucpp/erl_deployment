@@ -185,11 +185,13 @@
         <replace file="${dst_postinst}" token="${get_ip_command}" value="${misc.ip.linux}"/>
         <replace file="${dst_postinst}" token="${config_file}" value="${package.home}/releases/${app_release_version}/vm.args"/>
         <replace file="${dst_postinst}" token="${app_name}" value="${package.name}"/>
+        <replace file="${dst_postinst}" token="${app_home}" value="${package.home}"/>
         <replace file="${dst_postinst}" token="${cookie}" value="${erlang.cookie}"/>
 
         <replace file="${dst_postupgrade}" token="${get_ip_command}" value="${misc.ip.linux}"/>
         <replace file="${dst_postupgrade}" token="${config_file}" value="${package.home}/releases/${app_release_version}/vm.args"/>
         <replace file="${dst_postupgrade}" token="${app_name}" value="${package.name}"/>
+        <replace file="${dst_postupgrade}" token="${app_home}" value="${package.home}"/>
         <replace file="${dst_postupgrade}" token="${cookie}" value="${erlang.cookie}"/>
 
         <replace file="${dst_upstart}" token="${description}" value="${package.description}"/>
