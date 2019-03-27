@@ -10,4 +10,6 @@ replace_var() {
 ip=$(${get_ip_command})
 replace_var NODE_IP $ip ${config_file}
 
+for d in ${app_home}/erts-*/bin; do PATH="$PATH:$d"; done
+
 ${reload_command}
