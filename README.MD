@@ -197,6 +197,7 @@ files and also a `base.properties` one where you define the variables which have
 - `conf.app.profile.default` - your app default profile used during development. default to `${project.root}/_build/configs/default`
 - `conf.app.profile.release` - your release profile used with your relx release. default to `${project.root}/_build/configs/release`
 
+- `deb.post_build_target` - in case you want to execute a custom ant target after the release is done (just before creating the deb package).
 - `deb.post_install`- in case you want to execute a custom bash script after package installing. defaults to `${project.deployment_scripts}/deb/postinst.sh`
 - `deb.pre_remove` - in case you want to execute a custom bash script before package is removed. defaults to `${project.deployment_scripts}/deb/prerm.sh`
 - `deb.upstart_script` - in case you want to use another custom upstart script. defaults to `${project.deployment_scripts}/deb/upstart.conf`

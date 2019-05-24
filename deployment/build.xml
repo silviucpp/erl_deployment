@@ -84,6 +84,17 @@
 
         <antcallback target="prepare_files" return="tempdir_path, dst_postinst, dst_postupgrade, dst_prerm, dst_upstart, dst_systemd" />
 
+        <switch value="${deb.post_build_target}">
+            <case value="">
+                <echo message="No postbuild target."/>
+            </case>
+
+            <default>
+                <echo message="Use postbuild target: ${deb.post_build_target}."/>
+                <antcall target="${deb.post_build_target}" />
+            </default>
+        </switch>
+
         <antcall target="fpm::run" />
 
         <delete includeEmptyDirs="true">
