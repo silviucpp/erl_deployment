@@ -206,6 +206,9 @@ files and also a `base.properties` one where you define the variables which have
 - `deb.deps` - set all the debian packages (comma separated) that needs to exist for your package to work properly.
 - `deb.reload_modified_beams` - enable code hot-swapping when deb is updated. (default is false)
 
+- `release.use_erlang_heart` - Can be used to disable the Erlang Heart (http://erlang.org/doc/man/heart.html) which is enabled by 
+default in rebar3 releases. Can be done also based on environment (ex: `release.prod.use_erlang_heart=false`)
+
 - `misc.ip.osx` - allow the user to set it's own command for getting the IP address on a OSX system
 - `misc.ip.linux` - allow the user to set it's own command for getting the IP address on a Linux based system
 - `misc.reload_command` - the command used to hot-swap the code

@@ -221,6 +221,37 @@
             token="-kernel net_ticktime $TICKTIME $VM_ARGS"
             value="-kernel net_ticktime $TICKTIME"/>
 
+        <!-- Check if we need to disable Erlang heart (which is default in rebar3 releases) -->
+
+        <if>
+            <not>
+                <isset property="release.${env}.use_erlang_heart"/>
+            </not>
+            <then>
+                <var name="use_erlang_heart" value="${release.use_erlang_heart}"/>
+            </then>
+            <else>
+                <var name="use_erlang_heart" value="${release.${env}.use_erlang_heart}"/>
+            </else>
+        </if>
+
+        <echo message="Use Erlang HEART: ${use_erlang_heart}"/>
+
+        <if>
+            <equals arg1="${use_erlang_heart}" arg2="false" />
+            <then>
+                <replace
+                        file="${project.release.location}/${project.release.appdir}/bin/${project.release.appdir}"
+                        token="HEART_COMMAND="
+                        value="#HEART_COMMAND="/>
+
+                <replace
+                        file="${project.release.location}/${project.release.appdir}/bin/${project.release.appdir}"
+                        token="export HEART_COMMAND"
+                        value="#export HEART_COMMAND"/>
+            </then>
+        </if>
+
         <chmod file="${project.release.location}/${project.release.appdir}/bin/${project.release.appdir}" perm="+x"/>
 
     </target>
