@@ -9,6 +9,19 @@
         </classpath>
     </taskdef>
 
+    <!-- Load antlib to allow nested property names:
+         https://svn.apache.org/repos/asf/ant/antlibs/props/trunk/docs/index.html -->
+
+    <taskdef resource="org/apache/ant/props/antlib.xml">
+        <classpath>
+            <pathelement location="${project.deployment_scripts}/ant-props-1.0Alpha.jar"/>
+        </classpath>
+    </taskdef>
+
+    <propertyhelper>
+        <nested/>
+    </propertyhelper>
+
     <!-- Detect project.root in case is not defined -->
 
     <if>
@@ -40,7 +53,34 @@
 
     <target name="genconf" depends="check_env">
 
-        <antcallback target="bootstrap:gen_config" return="erlang.cookie" />
+        <if>
+            <isset property="env.${env}.dc.list"/>
+            <then>
+
+                <if>
+                    <not>
+                        <isset property="env.dc"/>
+                    </not>
+                    <then>
+                        <var name="env.dc" value="${env.${env}.dc.default}"/>
+                    </then>
+                </if>
+
+                <condition property="valid_dc">
+                    <and>
+                        <matches pattern="${env.dc}" string="${env.${env}.dc.list}"/>
+                    </and>
+                </condition>
+                <fail message="Not a valid DC. use one of: ${env.${env}.dc.list}" unless="valid_dc"/>
+            </then>
+            <else>
+                <var name="env.dc" value=""/>
+            </else>
+        </if>
+
+        <antcallback target="bootstrap:gen_config" return="erlang.cookie">
+            <param name="env.dc" value="${env.dc}"/>
+        </antcallback>
 
         <!-- Copy system.config and vm.args in the proper profile -->
 
@@ -75,13 +115,59 @@
 
     <target name="make_deb" depends="check_env">
 
-        <antcallback target="genconf" return="erlang.cookie">
-            <param name="env" value="${env}"/>
-            <param name="profile" value="release"/>
-        </antcallback>
+        <!--
+            An environment can have multiple DC configs. In case this is the case then for each data-center a config is generated
+            and included into the deb. Once deb is installed based on some condition the proper config will be enabled.
+            By default the config selection is implemented based on hostname.
+        -->
 
-        <antcall target="build_erlang" />
+        <if>
+            <isset property="env.${env}.dc.list"/>
+            <then>
+                <echo message="Generate DEB with multiple DC support: ${env.${env}.dc.list}"/>
 
+                <antcallback target="genconf" return="erlang.cookie">
+                    <param name="profile" value="release"/>
+                    <param name="env.dc" value="${env.${env}.dc.default}"/>
+                </antcallback>
+
+                <antcall target="build_erlang" />
+
+                <antcallback target="get_release_version" return="app_release_version" />
+                <property name="sys_config_path" value="${project.release.location}/${project.release.appdir}/releases/${app_release_version}"/>
+
+                <move file="${sys_config_path}/sys.config" tofile="${sys_config_path}/sys-${env.${env}.dc.default}.config" overwrite="true"/>
+
+                <for list="${env.${env}.dc.list}" param="currentdc">
+                    <sequential>
+                        <switch value="@{currentdc}">
+                            <case value="${env.${env}.dc.default}">
+                            </case>
+
+                            <default>
+                                <echo message="Generate config for: @{currentdc} ..."/>
+
+                                <antcallback target="genconf" return="erlang.cookie">
+                                    <param name="profile" value="release"/>
+                                    <param name="env.dc" value="@{currentdc}"/>
+                                </antcallback>
+
+                                <move file="${conf.app.profile.release}/sys.config" tofile="${sys_config_path}/sys-@{currentdc}.config" overwrite="true"/>
+                            </default>
+                        </switch>
+                    </sequential>
+                </for>
+            </then>
+            <else>
+                <antcallback target="genconf" return="erlang.cookie">
+                    <param name="profile" value="release"/>
+                </antcallback>
+
+                <antcall target="build_erlang" />
+            </else>
+        </if>
+
+        <!--
         <antcallback target="prepare_files" return="tempdir_path, dst_postinst, dst_postupgrade, dst_prerm, dst_upstart, dst_systemd" />
 
         <switch value="${deb.post_build_target}">
@@ -100,7 +186,7 @@
         <delete includeEmptyDirs="true">
             <fileset dir="${tempdir_path}"/>
         </delete>
-
+        -->
     </target>
 
     <!-- Internal targets -->
@@ -117,9 +203,11 @@
 
     <target name="build_erlang" >
 
+        <!--
         <exec executable="make" failonerror="true" dir="${project.root}">
             <arg line="relclean" />
         </exec>
+        -->
 
         <exec executable="rebar3" failonerror="true" dir="${project.root}">
             <arg line="as release release" />
