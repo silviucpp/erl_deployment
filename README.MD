@@ -65,7 +65,7 @@ The `vm.args` template of your application. `NODE_IP` is detected when the servi
 The other variable `${ERLANG_COOKIE}` is replaced when package is generated based on your configs.
 
 ```erl
--name appname@${NODE_IP}
+-name ${APP_NAME}@${NODE_IP}
 -setcookie ${ERLANG_COOKIE}
 ```
 
@@ -208,6 +208,7 @@ files and also a `base.properties` one where you define the variables which have
 
 - `release.use_erlang_heart` - Can be used to disable the Erlang Heart (http://erlang.org/doc/man/heart.html) which is enabled by 
 default in rebar3 releases. Can be done also based on environment (ex: `release.prod.use_erlang_heart=false`)
+- `release.node_name` - This value will replace the `${APP_NAME}` token into `vm.args` 
 
 - `misc.ip.osx` - allow the user to set it's own command for getting the IP address on a OSX system
 - `misc.ip.linux` - allow the user to set it's own command for getting the IP address on a Linux based system

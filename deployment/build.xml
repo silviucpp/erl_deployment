@@ -90,6 +90,7 @@
                 <copy file="${conf.temp_path}/app.config" tofile="${conf.app.profile.release}/sys.config" overwrite="true"/>
                 <copy file="${conf.temp_path}/vm.args" tofile="${conf.app.profile.release}/vm.args" overwrite="true"/>
                 <replace file="${conf.app.profile.release}/vm.args" token="${ERLANG_COOKIE}" value="${erlang.cookie}"/>
+                <replace file="${conf.app.profile.release}/vm.args" token="${APP_NAME}" value="${release.node_name}"/>
             </case>
 
             <case value="test">
@@ -97,6 +98,7 @@
                 <copy file="${conf.temp_path}/app.config" tofile="${conf.app.profile.test}/sys.config" overwrite="true"/>
                 <copy file="${conf.temp_path}/vm.args" tofile="${conf.app.profile.test}/vm.args" overwrite="true"/>
                 <replace file="${conf.app.profile.test}/vm.args" token="${ERLANG_COOKIE}" value="${erlang.cookie}"/>
+                <replace file="${conf.app.profile.test}/vm.args" token="${APP_NAME}" value="${release.node_name}"/>
             </case>
 
             <default>
@@ -107,6 +109,7 @@
                 <antcallback target="bootstrap::node_ip" return="node_ip" />
                 <replace file="${conf.app.profile.default}/vm.args" token="${NODE_IP}" value="${node_ip}"/>
                 <replace file="${conf.app.profile.default}/vm.args" token="${ERLANG_COOKIE}" value="${erlang.cookie}"/>
+                <replace file="${conf.app.profile.default}/vm.args" token="${APP_NAME}" value="${release.node_name}"/>
             </default>
 
         </switch>
@@ -201,10 +204,6 @@
     </target>
 
     <target name="build_erlang" >
-
-        <exec executable="make" failonerror="true" dir="${project.root}">
-            <arg line="relclean" />
-        </exec>
 
         <exec executable="rebar3" failonerror="true" dir="${project.root}">
             <arg line="as release release" />
