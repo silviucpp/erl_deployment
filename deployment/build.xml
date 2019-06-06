@@ -167,7 +167,6 @@
             </else>
         </if>
 
-        <!--
         <antcallback target="prepare_files" return="tempdir_path, dst_postinst, dst_postupgrade, dst_prerm, dst_upstart, dst_systemd" />
 
         <switch value="${deb.post_build_target}">
@@ -186,7 +185,7 @@
         <delete includeEmptyDirs="true">
             <fileset dir="${tempdir_path}"/>
         </delete>
-        -->
+
     </target>
 
     <!-- Internal targets -->
@@ -203,11 +202,9 @@
 
     <target name="build_erlang" >
 
-        <!--
         <exec executable="make" failonerror="true" dir="${project.root}">
             <arg line="relclean" />
         </exec>
-        -->
 
         <exec executable="rebar3" failonerror="true" dir="${project.root}">
             <arg line="as release release" />
