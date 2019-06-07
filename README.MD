@@ -223,6 +223,28 @@ What you need to do is:
 - In `app.properties` or `base.properties` you declare what values will have based on the environment. Example: app_name.variable_name=value (default value), env.app_name.variable_name=value. Will overwrite the value for that environment. Example: `beta.lager.graylog_host = 127.0.0.1`
 Note: all variables used for the main app should start with `app.` for example: `app.my_var=default_value` or `beta.app.my_var=beta_value`
 
+# Multiple datacenter based configs for an environment
+
+In case you have multiple DCs for a certain environment and you need to have one config for each DC you can define those as follow in `setup.config`:
+
+- `env.[env].dc.list=dc_1,dc_2,..dc_N` - Define all DC's for a specific environment
+- `env.[env].dc.default=dc_X` - Define the default DC (used in case you generate the config for a environment and you don't specify the DC)
+- `env.[env].[dc_X].hostname=your_dc_hostname` - for every single DC specify what's the hostname associated (use `dnsdomainname`)
+
+When you generate a deb for an env with multiple DC's, multiple `sys.config` files will be included (`sys-dc_name.config`) and after the deb is installed
+based on hostname the proper config will be renamed as `sys.config` and loaded by erlang app. 
+  
+Example:
+
+```
+env.prod.dc.list=la,ny  
+env.prod.dc.default=ny   
+env.prod.ny.hostname=newyork
+env.prod.la.hostname=losangeles
+```
+
+To define variables based on DC you can use for example `[env].[dc_name].variable`. 
+
 ### Available ant commands
 
 All above commands should be executed from the folder where `build.xml` is located:

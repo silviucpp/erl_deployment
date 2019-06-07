@@ -7,6 +7,8 @@ replace_var() {
     sed -i "s/^\(.*\)\${$variable_name}\(.*\)/\1$variable_value\2/" $file
 }
 
+${multi_dc_config_replace}
+
 ip=$(${get_ip_command})
 replace_var NODE_IP $ip ${config_file}
 

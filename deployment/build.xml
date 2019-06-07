@@ -334,6 +334,30 @@
         <replace file="${dst_systemd}" token="${app_root}" value="${package.home}"/>
         <replace file="${dst_systemd}" token="${app_name}" value="${package.app}"/>
 
+        <!-- in case of multi dc we need to make the post-install script to rename the proper config as sys.config -->
+
+        <if>
+            <isset property="env.${env}.dc.list"/>
+            <then>
+                <var name="hostname_routing" value="DOMAIN=`dnsdomainname`&#10;" />
+                <var name="config_file_location" value="${package.home}/releases/${app_release_version}" />
+
+                <for list="${env.${env}.dc.list}" param="currentdc">
+                    <sequential>
+                        <var name="dc_hostname" value="${env.${env}.@{currentdc}.hostname}" />
+                        <var name="hostname_routing" value="${hostname_routing}&#10;if [ $DOMAIN == &quot;${dc_hostname}&quot; ]; then mv ${config_file_location}/sys-@{currentdc}.config ${config_file_location}/sys.config ; fi" />
+                    </sequential>
+                </for>
+
+                <replace file="${dst_postinst}" token="${multi_dc_config_replace}" value="${hostname_routing}"/>
+                <replace file="${dst_postupgrade}" token="${multi_dc_config_replace}" value="${hostname_routing}"/>
+            </then>
+            <else>
+                <replace file="${dst_postinst}" token="${multi_dc_config_replace}" value=""/>
+                <replace file="${dst_postupgrade}" token="${multi_dc_config_replace}" value=""/>
+            </else>
+        </if>
+
     </target>
 
 </project>
