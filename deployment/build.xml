@@ -329,10 +329,12 @@
         <replace file="${dst_upstart}" token="${maintainer}" value="${package.maintainer}"/>
         <replace file="${dst_upstart}" token="${app_root}" value="${package.home}"/>
         <replace file="${dst_upstart}" token="${app_name}" value="${package.app}"/>
+        <replace file="${dst_upstart}" token="${limit_no_file}" value="${package.limit_no_file}"/>
 
         <replace file="${dst_systemd}" token="${description}" value="${package.description}"/>
         <replace file="${dst_systemd}" token="${app_root}" value="${package.home}"/>
         <replace file="${dst_systemd}" token="${app_name}" value="${package.app}"/>
+        <replace file="${dst_systemd}" token="${limit_no_file}" value="${package.limit_no_file}"/>
 
         <!-- in case of multi dc we need to make the post-install script to rename the proper config as sys.config -->
 

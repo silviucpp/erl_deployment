@@ -184,6 +184,7 @@ You can override the default values of different properties by defining them int
 - `package.maintainer`- maintainer of your package (default: dummy stuff)
 - `package.home` - the full path where your app will be installed. No reason to change this: (default: `${package.install_path}/${project.release.appdir}`)
 - `package.app` - the full path where your app binary will be located. No reason to change this: (default: `${package.home}/bin/${project.release.appdir}`)
+- `package.limit_no_file` - number of file descriptors the service will set before starting the app. Default is 120000
 
 - `project.environments`- list of all environments you support. Put anything you want here. default(dev|beta|prelive|prod)
 - `project.release.location`- where the erlang release is located. Defaults to: `${project.root}/_build/release/rel`
