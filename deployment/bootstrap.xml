@@ -6,12 +6,55 @@
     <target name="bootstrap:scripts">
 
         <scriptdef name="overwrite-properties" language="javascript">
-            <attribute name="environment" />
+            <attribute name="prefix" />
+            <attribute name="env" />
             <attribute name="dc" />
             <![CDATA[
-                function overwrite_props_with_prefix(prefix, properties)
+                function overwrite_props_with_prefix(prefix, env, properties)
                 {
+                    var start_with = prefix+"."+env+".";
+
                     var keyIter = properties.keySet().iterator();
+                    while(keyIter.hasNext())
+                    {
+                        var key = keyIter.next();
+                        var value = properties.get(key);
+
+                        if(key.startsWith(start_with))
+                        {
+                            var property = key.slice(start_with.length);
+                            print("Update: "+property+" with: "+value);
+                            project.setProperty(prefix+"."+property, value);
+                        }
+                    }
+                }
+
+                function overwrite_props(prefix, env, dc)
+                {
+                    overwrite_props_with_prefix(prefix,env, project.getProperties());
+
+                    if(dc)
+                        overwrite_props_with_prefix(prefix, dc, project.getProperties());
+                }
+
+                //overwrite properties with the one for that environment. those have higher priority
+                overwrite_props(attributes.get("prefix"), attributes.get("env"), attributes.get("dc"));
+             ]]>
+        </scriptdef>
+
+        <scriptdef name="dump-properties" language="javascript">
+            <attribute name="prefix" />
+            <attribute name="envs" />
+            <attribute name="file" />
+            <![CDATA[
+                function dump_properties(prefix, all_envs, file, properties)
+                {
+                    var out = new java.io.BufferedWriter(new java.io.FileWriter(file));
+                    var envs_array = all_envs.split("|");
+
+                    var keyIter = properties.keySet().iterator();
+                    var props = [];
+
                     while(keyIter.hasNext())
                     {
                         var key = keyIter.next();
@@ -20,23 +63,33 @@
                         if(key.startsWith(prefix))
                         {
                             var property = key.slice(prefix.length);
-                            print("Update: "+property+" with: "+value);
-                            project.setProperty(property, value);
+
+                            var found = false;
+
+                            for (var i = 0; i < envs_array.length; i++)
+                            {
+                                if(property.startsWith(envs_array[i]))
+                                {
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if(found == false)
+                            {
+                                //print("##dump: "+property+" with: "+value);
+                                props.push(property+"="+value+"\n");
+                            }
                         }
                     }
+
+                    props.sort().forEach(function(el){ out.write(el);});
+                    out.close( );
                 }
 
-                function overwrite_props(env, dc)
-                {
-                    overwrite_props_with_prefix(env+".", project.getProperties());
+                dump_properties(attributes.get("prefix"), attributes.get("envs"), attributes.get("file"), project.getProperties());
+            ]]>
 
-                    if(dc)
-                        overwrite_props_with_prefix(dc+".", project.getProperties());
-                }
-
-                //overwrite properties with the one for that environment. those have higher priority
-                overwrite_props(attributes.get("environment"), attributes.get("dc"));
-             ]]>
         </scriptdef>
 
         <scriptdef name="bootstrap-configs" language="javascript">
@@ -111,25 +164,40 @@
 
     <!-- Targets -->
 
-    <target name="bootstrap:gen_config" depends="bootstrap:scripts">
-
+    <target name="bootstrap:expand-properties" depends="check_env,bootstrap:scripts">
         <if>
-            <not>
-                <isset property="env.dc"/>
-            </not>
+            <isset property="env.${env}.dc.list"/>
             <then>
-                <var name="env.dc" value=""/>
+
+                <if>
+                    <not>
+                        <isset property="env.dc"/>
+                    </not>
+                    <then>
+                        <var name="env.dc" value="${env.${env}.dc.default}"/>
+                    </then>
+                </if>
+
+                <condition property="valid_dc">
+                    <and>
+                        <matches pattern="${env.dc}" string="${env.${env}.dc.list}"/>
+                    </and>
+                </condition>
+                <fail message="Not a valid DC. use one of: ${env.${env}.dc.list}" unless="valid_dc"/>
             </then>
             <else>
-                <echo>DC: ${env.dc}</echo>
+                <var name="env.dc" value=""/>
             </else>
         </if>
 
         <echo>Env: ${env}</echo>
+        <echo>DC: ${env.dc}</echo>
         <echo>Temp path: ${conf.temp_path}</echo>
         <echo>App config path: ${conf.app_path}</echo>
 
         <mkdir dir='${conf.temp_path}' />
+
+        <!-- Expand base.properties if any -->
 
         <if>
             <isset property="conf.base_path"/>
@@ -140,30 +208,53 @@
                     <fileset dir="${conf.base_path}" />
                 </copy>
 
-                <property file="${conf.temp_path}/base.properties"/>
+                <property file="${conf.temp_path}/base.properties" prefix="[lp]."/>
+                <overwrite-properties prefix="[lp]" env="${env}" dc="${env.dc}"/>
+                <dump-properties prefix="[lp]." envs="${project.environments}" file="${conf.temp_path}/base.properties"/>
 
-                <overwrite-properties environment="${env}" dc="${env.dc}"/>
-
+                <var file="${conf.temp_path}/base.properties"/>
             </then>
             <else>
                 <echo>No base config root used...</echo>
             </else>
         </if>
 
+        <!-- Expand app.properties -->
+
         <copy todir="${conf.temp_path}" overwrite="true">
             <fileset dir="${conf.app_path}" />
         </copy>
 
-        <property file="${conf.temp_path}/app.properties"/>
+        <property file="${conf.temp_path}/app.properties" prefix="[lp]."/>
+        <overwrite-properties prefix="[lp]" env="${env}" dc="${env.dc}"/>
+        <dump-properties prefix="[lp]." envs="${project.environments}" file="${conf.temp_path}/app.properties"/>
+    </target>
 
-        <overwrite-properties environment="${env}" dc="${env.dc}"/>
-
+    <target name="bootstrap:gen_config" depends="bootstrap:scripts">
+        <antcallback target="bootstrap:expand-properties" />
+        <var file="${conf.temp_path}/app.properties"/>
         <echo>Deps: ${app.dependencies}</echo>
-
         <bootstrap-configs environment="${env}" modules="${app.dependencies}" base_path ="${conf.temp_path}"/>
     </target>
 
-     <target name="bootstrap::node_ip">
+    <target name="bootstrap:file_expand_variables">
+
+        <echoproperties destfile="${conf.temp_path}/temp.replace" />
+
+        <loadfile srcfile="${file}" property="out_prop">
+            <filterchain>
+                <filterreader classname="org.apache.tools.ant.filters.ReplaceTokens">
+                    <param type="tokenchar" name="begintoken" value="${"/>
+                    <param type="tokenchar" name="endtoken" value="}"/>
+                    <param type="propertiesfile" value="${conf.temp_path}/temp.replace"/>
+                </filterreader>
+            </filterchain>
+        </loadfile>
+
+        <echo file="${file}" message="${out_prop}"/>
+    </target>
+
+    <target name="bootstrap::node_ip">
 
          <if>
              <os family="mac" />

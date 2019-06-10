@@ -52,67 +52,58 @@
     </target>
 
     <target name="genconf" depends="check_env">
-
-        <if>
-            <isset property="env.${env}.dc.list"/>
-            <then>
-
-                <if>
-                    <not>
-                        <isset property="env.dc"/>
-                    </not>
-                    <then>
-                        <var name="env.dc" value="${env.${env}.dc.default}"/>
-                    </then>
-                </if>
-
-                <condition property="valid_dc">
-                    <and>
-                        <matches pattern="${env.dc}" string="${env.${env}.dc.list}"/>
-                    </and>
-                </condition>
-                <fail message="Not a valid DC. use one of: ${env.${env}.dc.list}" unless="valid_dc"/>
-            </then>
-            <else>
-                <var name="env.dc" value=""/>
-            </else>
-        </if>
-
-        <antcallback target="bootstrap:gen_config" return="erlang.cookie">
-            <param name="env.dc" value="${env.dc}"/>
-        </antcallback>
+        <antcallback target="bootstrap:gen_config" />
+        <var file="${conf.temp_path}/app.properties"/>
 
         <!-- Copy system.config and vm.args in the proper profile -->
 
         <switch value="${profile}">
             <case value="release">
                 <echo message="Use RELEASE profile ..."/>
+                <var name="vm_args_path" value="${conf.app.profile.release}/vm.args" />
+
                 <copy file="${conf.temp_path}/app.config" tofile="${conf.app.profile.release}/sys.config" overwrite="true"/>
-                <copy file="${conf.temp_path}/vm.args" tofile="${conf.app.profile.release}/vm.args" overwrite="true"/>
-                <replace file="${conf.app.profile.release}/vm.args" token="${ERLANG_COOKIE}" value="${erlang.cookie}"/>
-                <replace file="${conf.app.profile.release}/vm.args" token="${APP_NAME}" value="${release.node_name}"/>
+                <copy file="${conf.temp_path}/vm.args" tofile="${vm_args_path}" overwrite="true"/>
+
+                <!-- deprecated -->
+
+                <replace file="${vm_args_path}" token="${ERLANG_COOKIE}" value="${erlang.cookie}"/>
+                <replace file="${vm_args_path}" token="${APP_NAME}" value="${release.node_name}"/>
             </case>
 
             <case value="test">
                 <echo message="Use TEST profile ..."/>
+                <var name="vm_args_path" value="${conf.app.profile.test}/vm.args" />
+
                 <copy file="${conf.temp_path}/app.config" tofile="${conf.app.profile.test}/sys.config" overwrite="true"/>
-                <copy file="${conf.temp_path}/vm.args" tofile="${conf.app.profile.test}/vm.args" overwrite="true"/>
-                <replace file="${conf.app.profile.test}/vm.args" token="${ERLANG_COOKIE}" value="${erlang.cookie}"/>
-                <replace file="${conf.app.profile.test}/vm.args" token="${APP_NAME}" value="${release.node_name}"/>
+                <copy file="${conf.temp_path}/vm.args" tofile="${vm_args_path}" overwrite="true"/>
+
+                <!-- deprecated -->
+
+                <replace file="${vm_args_path}" token="${ERLANG_COOKIE}" value="${erlang.cookie}"/>
+                <replace file="${vm_args_path}" token="${APP_NAME}" value="${release.node_name}"/>
             </case>
 
             <default>
                 <echo message="Use DEVELOPMENT profile ..."/>
+                <var name="vm_args_path" value="${conf.app.profile.default}/vm.args" />
 
                 <copy file="${conf.temp_path}/app.config" tofile="${conf.app.profile.default}/sys.config" overwrite="true"/>
-                <copy file="${conf.temp_path}/vm.args" tofile="${conf.app.profile.default}/vm.args" overwrite="true"/>
-                <antcallback target="bootstrap::node_ip" return="node_ip" />
-                <replace file="${conf.app.profile.default}/vm.args" token="${NODE_IP}" value="${node_ip}"/>
-                <replace file="${conf.app.profile.default}/vm.args" token="${ERLANG_COOKIE}" value="${erlang.cookie}"/>
-                <replace file="${conf.app.profile.default}/vm.args" token="${APP_NAME}" value="${release.node_name}"/>
-            </default>
+                <copy file="${conf.temp_path}/vm.args" tofile="${vm_args_path}" overwrite="true"/>
 
+                <antcallback target="bootstrap::node_ip" return="node_ip" />
+                <replace file="${vm_args_path}" token="${NODE_IP}" value="${node_ip}"/>
+
+                <!-- deprecated -->
+
+                <replace file="${vm_args_path}" token="${ERLANG_COOKIE}" value="${erlang.cookie}"/>
+                <replace file="${vm_args_path}" token="${APP_NAME}" value="${release.node_name}"/>
+            </default>
         </switch>
+
+        <antcallback target="bootstrap:file_expand_variables">
+            <param name="file" value="${vm_args_path}"/>
+        </antcallback>
 
     </target>
 
