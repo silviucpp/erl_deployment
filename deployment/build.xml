@@ -48,7 +48,7 @@
 
     <target name="help">
         <echo>genconf  -Denv=${project.environments}</echo>
-        <echo>make_deb -Denv=${project.environments}</echo>
+        <echo>make_deb -Denv=${project.environments} -Dbuild.clean=true(default)|false</echo>
     </target>
 
     <target name="genconf" depends="check_env">
@@ -194,16 +194,7 @@
         <fail message="Not a valid environment. use one of: ${project.environments}" unless="valid_env"/>
     </target>
 
-    <target name="build_erlang" >
-
-        <exec executable="make" failonerror="true" dir="${project.root}">
-            <arg line="relclean" />
-        </exec>
-
-        <exec executable="rebar3" failonerror="true" dir="${project.root}">
-            <arg line="as release release" />
-        </exec>
-
+    <target name="post_erlang_release" >
         <!--
         	temporary workaround for:
             https://github.com/erlware/relx/pull/649#issuecomment-436048940
@@ -245,6 +236,27 @@
                         value="#export HEART_COMMAND"/>
             </then>
         </if>
+    </target>
+
+    <target name="build_erlang" >
+
+        <if>
+            <not>
+                <equals arg1="${build.clean}" arg2="false" />
+            </not>
+            <then>
+                <echo message="## Run make relclean ..." />
+                <exec executable="make" failonerror="true" dir="${project.root}">
+                    <arg line="relclean" />
+                </exec>
+            </then>
+        </if>
+
+        <exec executable="rebar3" failonerror="true" dir="${project.root}">
+            <arg line="as release release" />
+        </exec>
+
+        <antcall target="post_erlang_release" />
 
         <chmod file="${project.release.location}/${project.release.appdir}/bin/${project.release.appdir}" perm="+x"/>
 
