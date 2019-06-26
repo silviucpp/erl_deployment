@@ -202,7 +202,7 @@
         -->
 
         <replace
-            file="${project.release.location}/${project.release.appdir}/bin/${project.release.appdir}"
+            file="${location}"
             token="-kernel net_ticktime $TICKTIME $VM_ARGS"
             value="-kernel net_ticktime $TICKTIME"/>
 
@@ -225,15 +225,8 @@
         <if>
             <equals arg1="${use_erlang_heart}" arg2="false" />
             <then>
-                <replace
-                        file="${project.release.location}/${project.release.appdir}/bin/${project.release.appdir}"
-                        token="HEART_COMMAND="
-                        value="#HEART_COMMAND="/>
-
-                <replace
-                        file="${project.release.location}/${project.release.appdir}/bin/${project.release.appdir}"
-                        token="export HEART_COMMAND"
-                        value="#export HEART_COMMAND"/>
+                <replace file="${location}" token="HEART_COMMAND=" value="#HEART_COMMAND="/>
+                <replace file="${location}" token="export HEART_COMMAND" value="#export HEART_COMMAND"/>
             </then>
         </if>
     </target>
@@ -256,9 +249,13 @@
             <arg line="as release release" />
         </exec>
 
-        <antcall target="post_erlang_release" />
+        <var name="release_path" value="${project.release.location}/${project.release.appdir}/bin/${project.release.appdir}"/>
 
-        <chmod file="${project.release.location}/${project.release.appdir}/bin/${project.release.appdir}" perm="+x"/>
+        <antcall target="post_erlang_release">
+            <param name="location" value="${release_path}"/>
+        </antcall>
+
+        <chmod file="${release_path}" perm="+x"/>
 
     </target>
 
