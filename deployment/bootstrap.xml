@@ -5,6 +5,14 @@
 
     <target name="bootstrap:scripts">
 
+        <scriptdef name="overwrite-property" language="javascript">
+            <attribute name="property" />
+            <attribute name="value" />
+            <![CDATA[
+                project.setProperty(attributes.get("property"), attributes.get("value"));
+             ]]>
+        </scriptdef>
+
         <scriptdef name="overwrite-properties" language="javascript">
             <attribute name="prefix" />
             <attribute name="env" />

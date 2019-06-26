@@ -35,6 +35,10 @@
         </else>
     </if>
 
+    <!-- Load env variables -->
+
+    <property environment="env_var"/>
+
     <!-- Load default properties -->
 
     <property file="${project.deployment_scripts}/defaults.properties"/>
@@ -44,9 +48,14 @@
     <import file="bootstrap.xml" as="nested"/>
     <import file="fpm.xml" as="nested"/>
 
+    <target name="show_env">
+        <echoproperties prefix="env_var."/>
+    </target>
+
     <!-- Public targets -->
 
     <target name="help">
+        <echo>show_env (List all environment variables)</echo>
         <echo>genconf  -Denv=${project.environments}</echo>
         <echo>make_deb -Denv=${project.environments} -Dbuild.clean=true(default)|false</echo>
     </target>
@@ -107,7 +116,16 @@
 
     </target>
 
-    <target name="make_deb" depends="check_env">
+    <target name="make_deb" depends="check_env,bootstrap:scripts">
+
+        <if>
+            <isset property="env_var.BUILD_NUMBER"/>
+            <then>
+                <overwrite-property property="package.version" value="${package.version}.${env_var.BUILD_NUMBER}"/>
+            </then>
+        </if>
+
+        <echo message="Package version: ${package.version}"/>
 
         <!--
             An environment can have multiple DC configs. In case this is the case then for each data-center a config is generated
