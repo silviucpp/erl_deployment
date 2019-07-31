@@ -56,6 +56,7 @@
 
     <target name="help">
         <echo>show_env (List all environment variables)</echo>
+        <echo>clean</echo>
         <echo>genconf  -Denv=${project.environments}</echo>
         <echo>make_deb -Denv=${project.environments} -Dbuild.clean=true(default)|false</echo>
     </target>
@@ -249,6 +250,17 @@
         </if>
     </target>
 
+    <target name="clean" >
+
+        <exec executable="rm" failonerror="false" dir="${project.root}">
+            <arg line="-rf _build/default" />
+        </exec>
+        <exec executable="rm" failonerror="false" dir="${project.root}">
+            <arg line="-rf _build/release" />
+        </exec>
+
+    </target>
+
     <target name="build_erlang" >
 
         <if>
@@ -256,10 +268,7 @@
                 <equals arg1="${build.clean}" arg2="false" />
             </not>
             <then>
-                <echo message="## Run make relclean ..." />
-                <exec executable="make" failonerror="true" dir="${project.root}">
-                    <arg line="relclean" />
-                </exec>
+                <antcall target="clean" />
             </then>
         </if>
 
