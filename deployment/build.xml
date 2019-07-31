@@ -252,8 +252,8 @@
 
     <target name="clean" >
 
-        <delete dir="${project.build.default.location}"/>
-        <delete dir="${project.build.release.location}"/>
+        <delete dir="${project.build.default.location}" followsymlinks="false" removenotfollowedsymlinks="true" />
+        <delete dir="${project.build.release.location}" followsymlinks="false" removenotfollowedsymlinks="true" />
 
     </target>
 
