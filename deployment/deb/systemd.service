@@ -18,6 +18,8 @@ Environment="HOME=${app_root}"
 Environment="ERLANG_PID_FILE_PATH=${app_root}/app.pid"
 Environment="CODE_LOADING_MODE=interactive"
 
+${other_systemd_commands}
+
 ExecStart=${app_name} start
 ExecStop=${app_name} stop
 

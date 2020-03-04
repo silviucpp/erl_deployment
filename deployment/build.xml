@@ -358,6 +358,7 @@
         <replace file="${dst_systemd}" token="${app_root}" value="${package.home}"/>
         <replace file="${dst_systemd}" token="${app_name}" value="${package.app}"/>
         <replace file="${dst_systemd}" token="${limit_no_file}" value="${package.limit_no_file}"/>
+        <replace file="${dst_systemd}" token="{other_systemd_commands}" value="${package.other_systemd_commands}"/>
 
         <!-- in case of multi dc we need to make the post-install script to rename the proper config as sys.config -->
 
