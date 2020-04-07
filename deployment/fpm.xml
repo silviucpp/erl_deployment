@@ -50,6 +50,19 @@
     </target>
 
     <target name="fpm::systemd">
+
+        <if>
+            <equals arg1="${deb.reload_modified_beams}" arg2="true" />
+            <then>
+                <property name="deb_restart_policy" value="--no-deb-systemd-restart-after-upgrade"/>
+            </then>
+            <else>
+                <property name="deb_restart_policy" value="--deb-systemd-restart-after-upgrade"/>
+            </else>
+        </if>
+
+        <echo message=" ## deb restart policy after upgrade: ${deb_restart_policy}" />
+
         <exec executable="fpm" failonerror="true">
             <arg value="-s"/>
             <arg value="dir"/>
@@ -60,6 +73,7 @@
             <arg value="${package.name}"/>
             <arg value="-v"/>
             <arg value="${package.version}"/>
+            <arg value="${deb_restart_policy}" />
             <arg value="--log=info"/>
             <arg value="--after-install=${dst_postinst}"/>
             <arg value="--after-upgrade=${dst_postupgrade}"/>

@@ -1,2 +1,4 @@
 /.idea/
 *.iml
+/ebin/
+/.rebar3/
