@@ -9,6 +9,7 @@ Type=forking
 NotifyAccess=main
 LimitNOFILE=${limit_no_file}
 PIDFile=${app_root}/app.pid
+LimitCORE=infinity
 Restart=on-failure
 TimeoutStartSec=300s
 RestartSec=5s
