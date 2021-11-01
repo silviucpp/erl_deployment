@@ -8,7 +8,9 @@
 ]).
 
 start(_StartType, _StartArgs) ->
-    erl_deployment_sup:start_link().
+    P = erl_deployment_sup:start_link(),
+    erl_systemd:wait_for_pid(5000),
+    P.
 
 stop(_State) ->
     ok.

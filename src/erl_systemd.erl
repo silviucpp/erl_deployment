@@ -6,6 +6,7 @@
     start_link/0,
     reloading/0,
     stopping/0,
+    wait_for_pid/1,
 
     init/1,
     handle_call/3,
@@ -27,6 +28,26 @@ reloading() ->
 
 stopping() ->
     safe_call(?MODULE, stopping).
+
+wait_for_pid(Timeout) ->
+    case os:getenv("ERLANG_PID_FILE_PATH") of
+        false ->
+            ok;
+        Path ->
+            Loops = trunc(Timeout/100),
+            wait_file(Loops, Path, 100)
+    end.
+
+wait_file(Loops, Path, WaitMs) when Loops > 0 ->
+    case filelib:file_size(Path) > 0 of
+        true ->
+            ok;
+        _ ->
+            timer:sleep(WaitMs),
+            wait_file(Loops - 1, Path, WaitMs)
+    end;
+wait_file(0, _Path, _WaitMs) ->
+    timeout.
 
 init([]) ->
     case os:getenv("ERLANG_PID_FILE_PATH") of
