@@ -371,7 +371,7 @@
                 <for list="${env.${env}.dc.list}" param="currentdc">
                     <sequential>
                         <var name="dc_hostname" value="${env.${env}.@{currentdc}.hostname}" />
-                        <var name="hostname_routing" value="${hostname_routing}&#10;if [ $DOMAIN == &quot;${dc_hostname}&quot; ]; then mv ${config_file_location}/sys-@{currentdc}.config ${config_file_location}/sys.config ; fi" />
+                        <var name="hostname_routing" value="${hostname_routing}&#10;if [ &quot;$DOMAIN&quot; = &quot;${dc_hostname}&quot; ]; then mv ${config_file_location}/sys-@{currentdc}.config ${config_file_location}/sys.config ; fi" />
                     </sequential>
                 </for>
 
