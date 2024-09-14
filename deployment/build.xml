@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <project name="Create deb package for Erlang release app">
 
+    <!--
+            https://stackoverflow.com/questions/69832933/apache-ant-with-graal-vm
+            https://mvnrepository.com/artifact/org.openjdk.nashorn/nashorn-core
+    -->
+    <path id ="javax.classpath">
+        <pathelement location="${project.deployment_scripts}/nashorn-core-15.4.jar" />
+        <pathelement location="${project.deployment_scripts}/asm-7.3.1.jar" />
+        <pathelement location="${project.deployment_scripts}/asm-tree-7.3.1.jar" />
+        <pathelement location="${project.deployment_scripts}/asm-util-7.3.1.jar" />
+        <pathelement location="${project.deployment_scripts}/asm-commons-7.3.1.jar" />
+    </path>
+
     <!-- Load ant contrib -->
 
     <taskdef resource="net/sf/antcontrib/antcontrib.properties">

@@ -5,7 +5,7 @@
 
     <target name="bootstrap:scripts">
 
-        <scriptdef name="overwrite-property" language="javascript">
+        <scriptdef name="overwrite-property" language="javascript" classpathref="javax.classpath">
             <attribute name="property" />
             <attribute name="value" />
             <![CDATA[
@@ -13,7 +13,7 @@
              ]]>
         </scriptdef>
 
-        <scriptdef name="overwrite-properties" language="javascript">
+        <scriptdef name="overwrite-properties" language="javascript" classpathref="javax.classpath">
             <attribute name="prefix" />
             <attribute name="env" />
             <attribute name="dc" />
@@ -50,7 +50,7 @@
              ]]>
         </scriptdef>
 
-        <scriptdef name="dump-properties" language="javascript">
+        <scriptdef name="dump-properties" language="javascript" classpathref="javax.classpath" >
             <attribute name="prefix" />
             <attribute name="envs" />
             <attribute name="file" />
@@ -100,7 +100,7 @@
 
         </scriptdef>
 
-        <scriptdef name="bootstrap-configs" language="javascript">
+        <scriptdef name="bootstrap-configs" language="javascript" classpathref="javax.classpath" >
             <attribute name="environment" />
             <attribute name="modules" />
             <attribute name="base_path" />
