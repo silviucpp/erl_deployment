@@ -144,11 +144,13 @@
                     print("Process config: "+ module);
 
                     var keyIter = properties.keySet().iterator();
+                    var module_with_dot = module+".";
+
                     while(keyIter.hasNext())
                     {
                         var key = keyIter.next();
 
-                        if(key.startsWith(module))
+                        if(key.startsWith(module_with_dot))
                         {
                             var prop = key.split(".").pop();
                             replace(conf_file, prop, properties.get(key));
@@ -264,19 +266,19 @@
 
     <target name="bootstrap::node_ip">
 
-         <if>
-             <os family="mac" />
-             <then>
-                 <exec executable="/bin/bash" failonerror="true" outputproperty="node_ip">
-                     <arg line="-c ${misc.ip.osx}" />
-                 </exec>
-             </then>
-             <else>
-                 <exec executable="/bin/bash" failonerror="true" outputproperty="node_ip">
-                     <arg line="-c &quot;${misc.ip.linux}&quot;" />
-                 </exec>
-             </else>
-         </if>
+        <if>
+            <os family="mac" />
+            <then>
+                <exec executable="/bin/bash" failonerror="true" outputproperty="node_ip">
+                    <arg line="-c ${misc.ip.osx}" />
+                </exec>
+            </then>
+            <else>
+                <exec executable="/bin/bash" failonerror="true" outputproperty="node_ip">
+                    <arg line="-c &quot;${misc.ip.linux}&quot;" />
+                </exec>
+            </else>
+        </if>
 
         <echo message="Node IP is ${node_ip}"/>
     </target>
