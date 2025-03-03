@@ -4,7 +4,8 @@
     {registered, []},
     {applications, [
         kernel,
-        stdlib
+        stdlib,
+        systemd
     ]},
     {mod, { erl_deployment_app, []}},
     {env, []}
