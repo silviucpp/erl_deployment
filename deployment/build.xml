@@ -6,18 +6,18 @@
             https://mvnrepository.com/artifact/org.openjdk.nashorn/nashorn-core
     -->
     <path id ="javax.classpath">
-        <pathelement location="${project.deployment_scripts}/nashorn-core-15.4.jar" />
-        <pathelement location="${project.deployment_scripts}/asm-7.3.1.jar" />
-        <pathelement location="${project.deployment_scripts}/asm-tree-7.3.1.jar" />
-        <pathelement location="${project.deployment_scripts}/asm-util-7.3.1.jar" />
-        <pathelement location="${project.deployment_scripts}/asm-commons-7.3.1.jar" />
+        <pathelement location="${project.deployment_scripts}/libs/nashorn-core-15.4.jar" />
+        <pathelement location="${project.deployment_scripts}/libs/asm-7.3.1.jar" />
+        <pathelement location="${project.deployment_scripts}/libs/asm-tree-7.3.1.jar" />
+        <pathelement location="${project.deployment_scripts}/libs/asm-util-7.3.1.jar" />
+        <pathelement location="${project.deployment_scripts}/libs/asm-commons-7.3.1.jar" />
     </path>
 
     <!-- Load ant contrib -->
 
     <taskdef resource="net/sf/antcontrib/antcontrib.properties">
         <classpath>
-            <pathelement location="${project.deployment_scripts}/ant-contrib.jar"/>
+            <pathelement location="${project.deployment_scripts}/libs/ant-contrib.jar"/>
         </classpath>
     </taskdef>
 
@@ -26,7 +26,7 @@
 
     <taskdef resource="org/apache/ant/props/antlib.xml">
         <classpath>
-            <pathelement location="${project.deployment_scripts}/ant-props-1.0Alpha.jar"/>
+            <pathelement location="${project.deployment_scripts}/libs/ant-props-1.0Alpha.jar"/>
         </classpath>
     </taskdef>
 
