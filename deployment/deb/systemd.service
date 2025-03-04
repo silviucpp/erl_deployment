@@ -16,7 +16,6 @@ WatchdogSec=60s
 KillMode=mixed
 
 Environment="HOME=${app_root}"
-Environment="CODE_LOADING_MODE=interactive"
 
 ${other_systemd_commands}
 
