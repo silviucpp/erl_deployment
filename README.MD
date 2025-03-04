@@ -201,9 +201,7 @@ files and also a `base.properties` one where you define the variables which have
 - `deb.post_build_target` - in case you want to execute a custom ant target after the release is done (just before creating the deb package).
 - `deb.post_install`- in case you want to execute a custom bash script after package installing. defaults to `${project.deployment_scripts}/deb/postinst.sh`
 - `deb.pre_remove` - in case you want to execute a custom bash script before package is removed. defaults to `${project.deployment_scripts}/deb/prerm.sh`
-- `deb.upstart_script` - in case you want to use another custom upstart script. defaults to `${project.deployment_scripts}/deb/upstart.conf`
 - `deb.systemd` - in case you want to use another custom systemd script. defaults to `${project.deployment_scripts}/deb/systemd.service`
-- `deb.use_upstart` - use upstart instead of systemd. (default: false). Ubuntu < 16.04 supports only upstart
 - `deb.deps` - set all the debian packages (comma separated) that needs to exist for your package to work properly.
 - `deb.reload_modified_beams` - enable code hot-swapping when deb is updated. (default is false)
 

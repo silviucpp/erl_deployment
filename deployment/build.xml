@@ -192,7 +192,7 @@
             </else>
         </if>
 
-        <antcallback target="prepare_files" return="tempdir_path, dst_postinst, dst_postupgrade, dst_prerm, dst_upstart, dst_systemd" />
+        <antcallback target="prepare_files" return="tempdir_path, dst_postinst, dst_postupgrade, dst_prerm, dst_systemd" />
 
         <switch value="${deb.post_build_target}">
             <case value="">
@@ -325,13 +325,11 @@
         <property name="dst_postinst" value="${tempdir_path}/postinst.sh"/>
         <property name="dst_postupgrade" value="${tempdir_path}/postupgrade.sh"/>
         <property name="dst_prerm" value="${tempdir_path}/prerm.sh"/>
-        <property name="dst_upstart" value="${tempdir_path}/${package.name}"/>
         <property name="dst_systemd" value="${tempdir_path}/${package.name}.service"/>
 
         <copy file="${deb.post_install}" tofile="${dst_postinst}"/>
         <copy file="${deb.post_upgrade}" tofile="${dst_postupgrade}"/>
         <copy file="${deb.pre_remove}" tofile="${dst_prerm}"/>
-        <copy file="${deb.upstart_script}" tofile="${dst_upstart}"/>
         <copy file="${deb.systemd}" tofile="${dst_systemd}"/>
 
         <if>
@@ -358,13 +356,6 @@
         <replace file="${dst_postupgrade}" token="${app_name}" value="${package.name}"/>
         <replace file="${dst_postupgrade}" token="${app_home}" value="${package.home}"/>
         <replace file="${dst_postupgrade}" token="${cookie}" value="${erlang.cookie}"/>
-
-        <replace file="${dst_upstart}" token="${description}" value="${package.description}"/>
-        <replace file="${dst_upstart}" token="${version}" value="${package.version}"/>
-        <replace file="${dst_upstart}" token="${maintainer}" value="${package.maintainer}"/>
-        <replace file="${dst_upstart}" token="${app_root}" value="${package.home}"/>
-        <replace file="${dst_upstart}" token="${app_name}" value="${package.app}"/>
-        <replace file="${dst_upstart}" token="${limit_no_file}" value="${package.limit_no_file}"/>
 
         <replace file="${dst_systemd}" token="${description}" value="${package.description}"/>
         <replace file="${dst_systemd}" token="${app_root}" value="${package.home}"/>
